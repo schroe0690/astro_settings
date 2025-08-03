@@ -10,59 +10,13 @@ return {
       dependencies = { "monkoose/parsley" },
       ft = { "lisp" }, -- Lispファイルで自動起動
       config = function()
-        -- sbclラッパーを使用（デフォルト設定）
-        -- ラッパーが /usr/local/bin/sbcl にあるので、カスタム設定は不要
-        
-        -- nvlime設定
+        -- 基本設定のみ
         vim.g.nvlime_config = {
-          leader = ",",           -- 押しやすいカンマに変更
-          implementation = "sbcl", -- デフォルトのsbcl（ラッパー経由でroswell）
-          
-          -- サーバー接続設定
+          leader = ",",
+          implementation = "sbcl",
           address = {
-            host = "127.0.0.1",   -- サーバーのホスト
-            port = 7002           -- サーバーのポート
-          },
-          connect_timeout = 10000, -- 接続タイムアウト（10秒に延長）
-          
-          -- 自動ドキュメント表示
-          autodoc = {
-            enabled = true,       -- 引数リスト自動表示
-            max_level = 5,        -- 検索する括弧の階層数
-            max_lines = 50        -- 検索する行数
-          },
-          
-          -- メインウィンドウ設定
-          main_window = {
-            position = "right",   -- REPL表示位置（right/left/top/bottom）
-            size = 80             -- ウィンドウサイズ
-          },
-          
-          -- フローティングウィンドウ設定
-          floating_window = {
-            border = "single",    -- ボーダースタイル
-            scroll_step = 3       -- スクロールステップ
-          },
-          
-          -- 補完設定
-          cmp = { enabled = false },     -- nvim-cmp統合
-          arglist = { enabled = true },  -- 引数リスト表示
-          
-          -- 入力履歴
-          input_history_limit = 100,     -- 入力履歴の保存数
-          
-          -- Swankコントリビューション
-          contribs = {
-            "SWANK-ASDF", 
-            "SWANK-PACKAGE-FU",
-            "SWANK-PRESENTATIONS", 
-            "SWANK-FANCY-INSPECTOR",
-            "SWANK-C-P-C", 
-            "SWANK-ARGLISTS",
-            "SWANK-REPL", 
-            "SWANK-FUZZY",
-            "SWANK-MREPL",           -- 複数REPL対応
-            "SWANK-TRACE-DIALOG"     -- トレース機能
+            host = "127.0.0.1",
+            port = 7002
           }
         }
         
@@ -99,9 +53,29 @@ return {
           }
         }
         
-        -- 設定が正しく読み込まれたことを確認
+        -- カスタムコマンドで確実なサーバー起動
+        vim.api.nvim_create_user_command('StartSwank', function()
+          vim.fn.jobstart({
+            '/usr/local/bin/sbcl',
+            '--eval', '(ql:quickload :swank)',
+            '--eval', '(swank:create-server :port 7002 :dont-close t)',
+            '--eval', '(format t "Swank server started on port 7002~%")',
+            '--eval', '(loop (sleep 1))'
+          }, {
+            detach = true,
+            on_stdout = function(_, data)
+              if data and #data > 0 then
+                print("Swank: " .. table.concat(data, "\n"))
+              end
+            end
+          })
+          print("Swank server starting... wait 5 seconds before connecting")
+        end, {})
+        
+        -- 設定確認
         vim.defer_fn(function()
-          print("nvlime configured with sbcl wrapper (roswell backend)")
+          print("nvlime: Use :StartSwank or ,rr to start server")
+          print("Then wait 5-10 seconds and use ,cc to connect")
         end, 100)
       end
     },
