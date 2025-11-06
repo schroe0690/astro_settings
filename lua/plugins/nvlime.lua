@@ -10,10 +10,10 @@ return {
       dependencies = { "monkoose/parsley" },
       ft = { "lisp" }, -- Lispファイルで自動起動
       config = function()
-        -- 基本設定のみ
+        -- 基本設定のみ（Roswell経由でsbclを使用）
         vim.g.nvlime_config = {
           leader = ",",
-          implementation = "sbcl",
+          implementation = "roswell", -- Roswell経由でsbclを使用
           address = {
             host = "127.0.0.1",
             port = 7002
@@ -53,10 +53,11 @@ return {
           }
         }
 
-        -- カスタムコマンドで確実なサーバー起動
+        -- カスタムコマンドで確実なサーバー起動（Roswell経由）
         vim.api.nvim_create_user_command('StartSwank', function()
           vim.fn.jobstart({
-            '/usr/local/bin/sbcl',
+            'ros',
+            'run',
             '--eval', '(ql:quickload :swank)',
             '--eval', '(swank:create-server :port 7002 :dont-close t)',
             '--eval', '(format t "Swank server started on port 7002~%")',
