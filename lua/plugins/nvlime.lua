@@ -13,7 +13,7 @@ return {
         -- 基本設定のみ（Roswell経由でsbclを使用）
         vim.g.nvlime_config = {
           leader = ",",
-          implementation = "roswell", -- Roswell経由でsbclを使用
+          implementation = "roswell",
           address = {
             host = "127.0.0.1",
             port = 7002
