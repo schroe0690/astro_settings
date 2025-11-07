@@ -52,32 +52,6 @@ return {
             }
           }
         }
-
-        -- カスタムコマンドで確実なサーバー起動（Roswell経由）
-        vim.api.nvim_create_user_command('StartSwank', function()
-          vim.fn.jobstart({
-            'ros',
-            'run',
-            '--eval', '(ql:quickload :swank)',
-            '--eval', '(swank:create-server :port 7002 :dont-close t)',
-            '--eval', '(format t "Swank server started on port 7002~%")',
-            '--eval', '(loop (sleep 1))'
-          }, {
-            detach = true,
-            on_stdout = function(_, data)
-              if data and #data > 0 then
-                print("Swank: " .. table.concat(data, "\n"))
-              end
-            end
-          })
-          print("Swank server starting... wait 5 seconds before connecting")
-        end, {})
-
-        -- 設定確認
-        vim.defer_fn(function()
-          print("nvlime: Use :StartSwank or ,rr to start server")
-          print("Then wait 5-10 seconds and use ,cc to connect")
-        end, 100)
       end
     },
 }
